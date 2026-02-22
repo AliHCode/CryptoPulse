@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, PieChart, Bell, TrendingUp, Menu, X, BarChart3, Search, Terminal, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCryptoStore } from '../store/cryptoStore';
@@ -73,9 +73,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <NewsTicker />
       {/* Global Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-black sticky top-8 z-50 gap-4">
-        <div className="font-bold text-lg tracking-widest text-slate-100 uppercase shrink-0">
+        <Link to="/" className="font-bold text-lg tracking-widest text-slate-100 uppercase shrink-0 hover:text-amber-500 transition-colors">
           CRYPTOPULSE
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
