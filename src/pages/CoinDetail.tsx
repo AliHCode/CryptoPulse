@@ -34,6 +34,7 @@ export default function CoinDetail() {
 
   useEffect(() => {
     if (!id) return;
+    window.scrollTo(0, 0);
 
     const loadHistory = async () => {
       setLoading(true);
