@@ -211,7 +211,7 @@ export default function CoinDetail() {
 
           <div className="h-[400px] w-full relative">
             {chartType === 'candle' ? (
-              <TradingViewChart coinId={coin.id} days={timeframe} />
+              <TradingViewChart symbol={coin.symbol} />
             ) : loading ? (
               <div className="absolute inset-0 z-10 flex flex-col gap-4 p-4 animate-pulse">
                 {/* Chart Skeleton */}
