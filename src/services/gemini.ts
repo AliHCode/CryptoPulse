@@ -1,16 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import { Coin } from "../store/cryptoStore";
 
-// Initialize Gemini
-// Use Vite's import.meta.env, and only initialize if the key exists to prevent crashing on load
-const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-
 export const analyzeMarket = async (coins: Coin[]) => {
-  if (!ai) {
-    throw new Error("Gemini API Key missing! Add VITE_GEMINI_API_KEY to your Vercel Environment Variables.");
-  }
-
   const topCoins = coins.slice(0, 10).map(c => ({
     name: c.name,
     symbol: c.symbol,
@@ -28,24 +18,24 @@ export const analyzeMarket = async (coins: Coin[]) => {
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      }
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
     });
 
-    return JSON.parse(response.text || '{}');
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Gemini analysis failed:", error);
-    throw error;
+    return null; // Return null gracefully if API fails or running locally without Vercel backend
   }
 };
 
 export const analyzePortfolio = async (portfolio: any[], coins: Coin[]) => {
-  if (!ai) return null;
-
   // Enrich portfolio with current data
   const enrichedPortfolio = portfolio.map(item => {
     const coin = coins.find(c => c.id === item.coinId);
@@ -67,17 +57,19 @@ export const analyzePortfolio = async (portfolio: any[], coins: Coin[]) => {
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      }
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
     });
 
-    return JSON.parse(response.text || '{}');
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Gemini portfolio analysis failed:", error);
-    throw error;
+    return null;
   }
 };
