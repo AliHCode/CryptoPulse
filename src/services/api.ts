@@ -14,15 +14,21 @@ export const fetchCoins = async (): Promise<Coin[]> => {
   }
 
   try {
-    const response = await axios.get(`${COINGECKO_API}/coins/markets`, {
-      params: {
-        vs_currency: 'usd',
-        order: 'market_cap_desc',
-        per_page: 100,
-        page: 1,
-        sparkline: true,
-        price_change_percentage: '24h,7d',
-      },
+    // Attempt to hit our secure Vercel Serverless Function proxy first
+    // This bypasses the strict Coingecko CORS policy on Vercel deployment
+    const response = await axios.get(`/api/coins`).catch(async (err) => {
+      console.warn("Vercel Proxy unavailable entirely, reverting to local mock Coingecko call", err);
+      // Fallback for local development if the Vercel CLI wasn't started
+      return await axios.get(`${COINGECKO_API}/coins/markets`, {
+        params: {
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 100,
+          page: 1,
+          sparkline: true,
+          price_change_percentage: '24h,7d',
+        },
+      });
     });
 
     cache = { data: response.data, timestamp: Date.now() };
@@ -32,7 +38,6 @@ export const fetchCoins = async (): Promise<Coin[]> => {
     throw error;
   }
 };
-
 
 export const fetchCoinHistory = async (coinId: string, days: number = 7, coinSymbol?: string) => {
   // Strategy: Try Binance first (unlimited, fast), fall back to CoinGecko if the pair doesn't exist
@@ -60,18 +65,21 @@ export const fetchCoinHistory = async (coinId: string, days: number = 7, coinSym
     // If Binance returns empty, fall through to CoinGecko
     throw new Error('Empty Binance response');
   } catch (_binanceError) {
-    // Binance failed (pair doesn't exist) — fall back to CoinGecko
-    console.warn(`Binance unavailable for ${coinId}, falling back to CoinGecko`);
+    // Binance failed (pair doesn't exist) — fall back to CoinGecko via Proxy
+    console.warn(`Binance unavailable for ${coinId}, falling back to Vercel Proxy`);
     try {
-      const response = await axios.get(`${COINGECKO_API}/coins/${coinId}/market_chart`, {
-        params: {
-          vs_currency: 'usd',
-          days: days,
-        },
+      const response = await axios.get(`/api/history`, {
+        params: { coinId, days }
+      }).catch(async () => {
+        // Fallback to local dev direct API if logic runs outside Vercel
+        const directRes = await axios.get(`${COINGECKO_API}/coins/${coinId}/market_chart`, { params: { vs_currency: 'usd', days } });
+        return { data: directRes.data.prices }; // Shim to match nested proxy return
       });
-      return response.data.prices; // Array of [timestamp, price]
+
+      // Return unwrapped array
+      return response.data.prices || response.data;
     } catch (geckoError) {
-      console.error(`Both Binance and CoinGecko failed for ${coinId}:`, geckoError);
+      console.error(`Both Binance and CoinGecko / Proxy failed for ${coinId}:`, geckoError);
       return [];
     }
   }
@@ -102,7 +110,10 @@ export const fetchCoinOHLC = async (coinId: string, days: number = 7) => {
 
 export const fetchFearAndGreed = async () => {
   try {
-    const response = await axios.get('https://api.alternative.me/fng/?limit=1');
+    const response = await axios.get('/api/fng').catch(async () => {
+      return await axios.get('https://api.alternative.me/fng/?limit=1');
+    });
+
     if (response.data && response.data.data && response.data.data.length > 0) {
       return {
         value: parseInt(response.data.data[0].value),
