@@ -157,7 +157,7 @@ export default function CoinDetail() {
       {/* Main Analysis Section */}
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Chart Section */}
-        <div className="lg:col-span-3 border border-slate-800 bg-black p-6 flex flex-col h-[500px]">
+        <div className="lg:col-span-3 border border-slate-800 bg-black p-6 flex flex-col min-h-[500px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-sm font-bold text-amber-500 uppercase flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -209,7 +209,7 @@ export default function CoinDetail() {
             </div>
           </div>
 
-          <div className="h-[400px] w-full relative">
+          <div className={clsx("w-full relative", chartType === 'candle' ? "min-h-[600px]" : "h-[400px]")}>
             {chartType === 'candle' ? (
               <TradingViewChart symbol={coin.symbol} />
             ) : loading ? (

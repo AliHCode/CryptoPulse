@@ -82,6 +82,7 @@ body {
   background-color: var(--app-bg);
   color: var(--app-text);
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar for Terminal Feel */
