@@ -225,8 +225,8 @@ export default function Dashboard() {
           <table className="w-full text-left border-collapse font-mono text-sm">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900 text-[10px] uppercase tracking-wider text-slate-500">
-                <th className="py-4 px-4 font-normal w-8"></th>
-                <th className="py-4 px-4 font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('rank')}>
+                <th className="py-4 px-2 sm:px-4 font-normal w-6 sm:w-8"></th>
+                <th className="py-4 px-2 sm:px-4 font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('rank')}>
                   Asset<SortIcon column="rank" />
                 </th>
                 <th className="py-4 px-4 text-right font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('price')}>
@@ -248,10 +248,10 @@ export default function Dashboard() {
               {isLoading && coins.length === 0 ? (
                 [...Array(15)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="py-4 px-2 pl-4"><div className="w-4 h-4 rounded bg-slate-800" /></td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-slate-800" />
+                    <td className="py-4 px-2 sm:px-4"><div className="w-4 h-4 rounded bg-slate-800" /></td>
+                    <td className="py-4 px-2 sm:px-4">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="w-4 h-4 rounded bg-slate-800 hidden sm:block" />
                         <div className="w-6 h-6 rounded-full bg-slate-800" />
                         <div className="w-16 h-4 rounded bg-slate-800" />
                       </div>
@@ -275,10 +275,10 @@ export default function Dashboard() {
               ) : (
                 filteredCoins.map((coin) => (
                   <tr key={coin.id} className="group hover:bg-slate-900 transition-colors">
-                    <td className="py-4 px-2 pl-4">
+                    <td className="py-4 pl-2 pr-1 sm:px-4 w-6 sm:w-8">
                       <button
                         onClick={() => toggleWatchlist(coin.id)}
-                        className="p-1 transition-colors"
+                        className="p-1 transition-colors block mx-auto"
                       >
                         <Star className={clsx(
                           "w-3.5 h-3.5 transition-colors",
@@ -288,18 +288,18 @@ export default function Dashboard() {
                         )} />
                       </button>
                     </td>
-                    <td className="py-4 px-4">
-                      <Link to={`/coin/${coin.id}`} className="flex items-center gap-2">
-                        <span className="font-bold text-amber-500 w-6 text-right text-xs">{coin.market_cap_rank}</span>
+                    <td className="py-4 pl-1 pr-2 sm:px-4">
+                      <Link to={`/coin/${coin.id}`} className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="font-bold text-amber-500 w-4 sm:w-6 text-right text-[10px] sm:text-xs">{coin.market_cap_rank}</span>
                         {coin.image && (
-                          <img src={coin.image} alt={coin.name} className="w-5 h-5 object-contain" />
+                          <img src={coin.image} alt={coin.name} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
                         )}
                         <div>
-                          <div className="font-bold text-slate-200 group-hover:text-white group-hover:underline decoration-amber-500 underline-offset-2 text-sm">{coin.symbol.toUpperCase()}</div>
+                          <div className="font-bold text-slate-200 group-hover:text-white group-hover:underline decoration-amber-500 underline-offset-2 text-xs sm:text-sm">{coin.symbol.toUpperCase()}</div>
                         </div>
                       </Link>
                     </td>
-                    <td className="py-4 px-4 text-right text-slate-200 text-sm tabular-nums">
+                    <td className="py-4 px-2 sm:px-4 text-right text-slate-200 text-xs sm:text-sm tabular-nums">
                       <PriceFlash value={coin.current_price} formatter={formatCurrency} />
                     </td>
                     <td className={clsx(
