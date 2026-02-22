@@ -1,0 +1,5 @@
+{
+  "name": "CryptoPulse",
+  "description": "Real-time cryptocurrency tracking application with price alerts, portfolio management, and AI-powered market insights.",
+  "requestFramePermissions": []
+}

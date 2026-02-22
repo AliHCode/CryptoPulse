@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --app-bg: #000000;
+    --app-bg-sec: #0f172a;
+    /* slate-900 */
+    --app-border: #1e293b;
+    /* slate-800 */
+    --app-border-hover: #334155;
+    /* slate-700 */
+    --app-text-muted2: #475569;
+    /* slate-600 */
+    --app-text-muted: #64748b;
+    /* slate-500 */
+    --app-text: #cbd5e1;
+    /* slate-300 */
+    --app-text-bright: #e2e8f0;
+    /* slate-200 */
+    --app-text-brightest: #f1f5f9;
+    /* slate-100 */
+    --app-white: #ffffff;
+  }
+
+  :root[data-theme='light'] {
+    /* Backgrounds flip from black to pure white */
+    --app-bg: #ffffff;
+    /* replaces black */
+    --app-bg-sec: #f1f5f9;
+    /* replaces slate-900 (now light gray) */
+
+    /* Borders flip from dark slate to significantly darker light slate */
+    --app-border: #cbd5e1;
+    /* replaces slate-800 with slate-300 */
+    --app-border-hover: #94a3b8;
+    /* replaces slate-700 with slate-400 */
+
+    /* Text flips from light to absolute black */
+    --app-text-muted2: #64748b;
+    /* replaces slate-600 */
+    --app-text-muted: #475569;
+    /* replaces slate-500 */
+    --app-text: #0f172a;
+    /* replaces slate-300 */
+    --app-text-bright: #000000;
+    /* replaces slate-200 */
+    --app-text-brightest: #000000;
+    /* replaces slate-100 */
+
+    /* White text flips to Black text */
+    --app-white: #000000;
+    /* replaces pure white with pure black */
+  }
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Advanced Theme Architecture: Map core tailwind colors to our CSS variables */
+  --color-black: var(--app-bg);
+  --color-slate-900: var(--app-bg-sec);
+  --color-slate-800: var(--app-border);
+  --color-slate-700: var(--app-border-hover);
+  --color-slate-600: var(--app-text-muted2);
+  --color-slate-500: var(--app-text-muted);
+  --color-slate-400: var(--app-text-muted);
+  --color-slate-300: var(--app-text);
+  --color-slate-200: var(--app-text-bright);
+  --color-slate-100: var(--app-text-brightest);
+  --color-slate-50: var(--app-text-brightest);
+  --color-white: var(--app-white);
+
+  /* Preserve explicit colors */
+  --color-amber-500: #f59e0b;
+  --color-emerald-500: #10b981;
+  --color-rose-500: #f43f5e;
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbar for Terminal Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* Terminal Utilities */
+.terminal-border {
+  border: 1px solid var(--color-terminal-grid);
+}
+
+.terminal-text-accent {
+  color: var(--color-terminal-accent);
+}
+
+.font-mono-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
