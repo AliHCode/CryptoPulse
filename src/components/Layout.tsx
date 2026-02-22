@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PieChart, Bell, TrendingUp, Menu, X, BarChart3, Search, Terminal, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCryptoStore } from '../store/cryptoStore';
@@ -15,9 +15,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
   });
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
   const { setCoins, setLoading, coins, alerts, searchQuery, setSearchQuery } = useCryptoStore();
   const { addToast } = useToastStore();
   const location = useLocation();
+
+  // Handle Search Result Selection
+  const navigate = useNavigate();
+  const handleSelectSearchResult = (coinId: string) => {
+    setSearchQuery('');
+    setIsMobileSearchOpen(false);
+    navigate(`/coin/${coinId}`);
+  };
 
   useEffect(() => {
     // Request notification permission on mount
@@ -67,6 +76,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { to: '/analytics', icon: BarChart3, label: 'Analytics' },
     { to: '/alerts', icon: Bell, label: 'Alerts' },
   ];
+  const filteredSearch = searchQuery.trim() === '' ? [] : coins.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  ).slice(0, 10);
 
   return (
     <div className="min-h-screen bg-black text-slate-300 font-mono selection:bg-slate-800 pt-8">
@@ -76,7 +89,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link to="/" className="font-bold text-base sm:text-lg tracking-widest text-slate-100 uppercase shrink-0 hover:text-amber-500 transition-colors">
           CRYPTOPULSE
         </Link>
-        <div className="flex items-center gap-1 sm:gap-3 flex-1 justify-end">
+        {/* Desktop Search / Mobile Toggle */}
+        <div className={clsx("flex items-center gap-1 sm:gap-3 flex-1 justify-end", isMobileSearchOpen ? "hidden" : "flex")}>
           <div className="relative hidden lg:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
@@ -84,9 +98,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               placeholder="SEARCH TICKER..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48 bg-black border border-slate-700 text-white pl-9 pr-4 py-1.5 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors placeholder:text-slate-700 uppercase"
+              className="w-64 bg-black border border-slate-700 text-white pl-9 pr-4 py-1.5 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors placeholder:text-slate-700 uppercase"
             />
+            {/* Desktop Dropdown */}
+            {searchQuery && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 max-h-64 overflow-y-auto z-50 shadow-2xl">
+                {filteredSearch.length > 0 ? (
+                  filteredSearch.map(coin => (
+                    <button
+                      key={coin.id}
+                      onClick={() => handleSelectSearchResult(coin.id)}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-800 flex items-center gap-3 transition-colors border-b border-slate-800 last:border-0"
+                    >
+                      {coin.image && <img src={coin.image} alt={coin.name} className="w-5 h-5 object-contain" />}
+                      <span className="font-bold text-slate-200">{coin.symbol.toUpperCase()}</span>
+                      <span className="text-slate-500 text-xs truncate ml-auto">{coin.name}</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-xs text-slate-500">NO RESULTS FOUND</div>
+                )}
+              </div>
+            )}
           </div>
+
+          <button
+            onClick={() => setIsMobileSearchOpen(true)}
+            className="p-2 hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors lg:hidden text-amber-500"
+            title="Search"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
           <button
             onClick={async () => {
               setAnalyzing(true);
@@ -102,17 +145,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               }
             }}
             disabled={analyzing || coins.length === 0}
-            className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold font-mono uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-2 px-2 sm:px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold font-mono uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            title="Run Market Analysis"
           >
             {analyzing ? (
-              <span className="animate-pulse">PROCESSING...</span>
+              <span className="animate-pulse flex items-center gap-2"><Terminal className="w-4 h-4" /><span className="hidden sm:inline">PROCESSING...</span></span>
             ) : (
               <>
-                <Terminal className="w-3 h-3" />
-                Run Analysis
+                <Terminal className="w-4 h-4 sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">Run Analysis</span>
               </>
             )}
           </button>
+
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             className="p-2 hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors text-amber-500"
@@ -120,10 +165,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
+
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors">
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
+
+        {/* Mobile Search Overlay */}
+        {isMobileSearchOpen && (
+          <div className="flex-1 flex items-center gap-2 lg:hidden w-full absolute inset-0 bg-black px-2 z-50">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="SEARCH TICKER..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-amber-500 text-white pl-9 pr-4 py-2 text-sm font-mono focus:outline-none transition-colors placeholder:text-slate-500 uppercase"
+              />
+              {/* Mobile Dropdown */}
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 max-h-64 overflow-y-auto z-50 shadow-2xl">
+                  {filteredSearch.length > 0 ? (
+                    filteredSearch.map(coin => (
+                      <button
+                        key={coin.id}
+                        onClick={() => handleSelectSearchResult(coin.id)}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors border-b border-slate-800 last:border-0"
+                      >
+                        {coin.image && <img src={coin.image} alt={coin.name} className="w-5 h-5 object-contain" />}
+                        <span className="font-bold text-slate-200">{coin.symbol.toUpperCase()}</span>
+                        <span className="text-slate-500 text-xs truncate ml-auto">{coin.name}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-xs text-slate-500">NO RESULTS FOUND</div>
+                  )}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setIsMobileSearchOpen(false);
+                setSearchQuery('');
+              }}
+              className="p-2 text-slate-500 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex">
