@@ -2,12 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCryptoStore } from '../store/cryptoStore';
 import { fetchCoinHistory } from '../services/api';
+import { BarChart3, TrendingUp, TrendingDown, Clock, PieChart, Activity, BellPlus, X, AlertTriangle, ArrowRight, LineChart as LineChartIcon, CandlestickChart } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
-import { ArrowLeft, Bell, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { ArrowLeft, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import OrderBook from '../components/OrderBook';
 import PriceFlash from '../components/PriceFlash';
+import TradingViewChart from '../components/TradingViewChart';
 
 export default function CoinDetail() {
   const { id } = useParams();
@@ -17,6 +19,7 @@ export default function CoinDetail() {
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState(7);
   const [history, setHistory] = useState<any[]>([]);
+  const [chartType, setChartType] = useState<'line' | 'candle'>('line');
 
   // Modal States
   const [showPositionModal, setShowPositionModal] = useState(false);
@@ -155,29 +158,61 @@ export default function CoinDetail() {
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Chart Section */}
         <div className="lg:col-span-3 border border-slate-800 bg-black p-6 flex flex-col h-[500px]">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-sm font-bold text-amber-500 uppercase flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Price Action
             </h2>
-            <div className="flex border border-slate-800">
-              {[1, 7, 30, 90].map((d) => (
+
+            <div className="flex items-center gap-4">
+              {/* Chart Type Toggle */}
+              <div className="flex border border-slate-800 rounded overflow-hidden">
                 <button
-                  key={d}
-                  onClick={() => setTimeframe(d)}
+                  onClick={() => setChartType('line')}
                   className={clsx(
-                    "px-3 py-1 text-xs font-bold transition-all border-r border-slate-800 last:border-r-0",
-                    timeframe === d ? "bg-amber-500 text-black" : "text-slate-500 hover:text-white hover:bg-slate-900"
+                    "flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition-all border-r border-slate-800",
+                    chartType === 'line' ? "bg-amber-500 text-black" : "bg-black text-slate-500 hover:text-white hover:bg-slate-900"
                   )}
+                  title="Simple Line Chart"
                 >
-                  {d === 1 ? '24H' : `${d}D`}
+                  <LineChartIcon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Line</span>
                 </button>
-              ))}
+                <button
+                  onClick={() => setChartType('candle')}
+                  className={clsx(
+                    "flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition-all",
+                    chartType === 'candle' ? "bg-amber-500 text-black" : "bg-black text-slate-500 hover:text-white hover:bg-slate-900"
+                  )}
+                  title="Advanced Candlestick Chart"
+                >
+                  <CandlestickChart className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Candles</span>
+                </button>
+              </div>
+
+              {/* Timeframe Selector */}
+              <div className="flex border border-slate-800 rounded overflow-hidden">
+                {[1, 7, 30, 90].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setTimeframe(d)}
+                    className={clsx(
+                      "px-3 py-1.5 text-xs font-bold transition-all border-r border-slate-800 last:border-r-0",
+                      timeframe === d ? "bg-slate-700 text-white" : "bg-black text-slate-500 hover:text-white hover:bg-slate-900"
+                    )}
+                  >
+                    {d === 1 ? '24H' : `${d}D`}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           <div className="h-[400px] w-full relative">
-            {loading ? (
+            {chartType === 'candle' ? (
+              <TradingViewChart coinId={coin.id} days={timeframe} />
+            ) : loading ? (
               <div className="absolute inset-0 z-10 flex flex-col gap-4 p-4 animate-pulse">
                 {/* Chart Skeleton */}
                 <div className="w-32 h-6 bg-slate-800 rounded" />
