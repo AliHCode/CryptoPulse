@@ -79,10 +79,16 @@ export const fetchCoinHistory = async (coinId: string, days: number = 7, coinSym
 
 export const fetchCoinOHLC = async (coinId: string, days: number = 7) => {
   try {
+    // Coingecko OHLC endpoint ONLY accepts specific values: 1, 7, 14, 30, 90, 365, max
+    const validDays = [1, 7, 14, 30, 90, 365];
+    const targetDays = validDays.reduce((prev, curr) =>
+      Math.abs(curr - days) < Math.abs(prev - days) ? curr : prev
+    );
+
     const response = await axios.get(`${COINGECKO_API}/coins/${coinId}/ohlc`, {
       params: {
         vs_currency: 'usd',
-        days: days,
+        days: targetDays,
       },
     });
     // Returns array of [timestamp, open, high, low, close]

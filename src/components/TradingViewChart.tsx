@@ -13,6 +13,7 @@ export default function TradingViewChart({ coinId, days }: TradingViewChartProps
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
     const [loading, setLoading] = useState(false);
+    const [noData, setNoData] = useState(false);
 
     useEffect(() => {
         if (!chartContainerRef.current) return;
@@ -45,8 +46,7 @@ export default function TradingViewChart({ coinId, days }: TradingViewChartProps
         });
 
         // Add Candlestick Series
-        // Provide TS any cast because v5 IChartApi signature is strict on extension types
-        const candlestickSeries = (chart as any).addCandlestickSeries({
+        const candlestickSeries = chart.addCandlestickSeries({
             upColor: '#10b981', // emerald-500
             downColor: '#ef4444', // red-500
             borderVisible: false,
@@ -73,11 +73,17 @@ export default function TradingViewChart({ coinId, days }: TradingViewChartProps
             if (!seriesRef.current || !chartRef.current) return;
 
             setLoading(true);
+            setNoData(false);
             try {
                 // Fetch OHLC data (Coingecko returns [time, open, high, low, close])
                 const rawData = await fetchCoinOHLC(coinId, days);
 
-                if (!active || !rawData || !rawData.length) return;
+                if (!active) return;
+
+                if (!rawData || !rawData.length) {
+                    setNoData(true);
+                    return;
+                }
 
                 // Format data for Lightweight Charts
                 const formattedData: CandlestickData[] = rawData.map((candle: [number, number, number, number, number]) => {
@@ -96,6 +102,7 @@ export default function TradingViewChart({ coinId, days }: TradingViewChartProps
 
             } catch (err) {
                 console.error("Failed to load candlestick data", err);
+                if (active) setNoData(true);
             } finally {
                 if (active) setLoading(false);
             }
@@ -125,9 +132,16 @@ export default function TradingViewChart({ coinId, days }: TradingViewChartProps
 
     return (
         <div className="w-full h-full relative">
-            {loading && (
+            {loading && !noData && (
                 <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center">
                     <RefreshCw className="w-6 h-6 text-amber-500 animate-spin" />
+                </div>
+            )}
+            {noData && !loading && (
+                <div className="absolute inset-0 z-10 bg-black/80 flex items-center justify-center">
+                    <p className="text-slate-500 text-sm font-mono flex items-center gap-2">
+                        NO_TICKER_DATA_AVAILABLE
+                    </p>
                 </div>
             )}
             <div ref={chartContainerRef} className="w-full h-full" />
