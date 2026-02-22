@@ -225,8 +225,8 @@ export default function Dashboard() {
           <table className="w-full text-left border-collapse font-mono text-sm">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900 text-[10px] uppercase tracking-wider text-slate-500">
-                <th className="py-4 px-2 sm:px-4 font-normal w-6 sm:w-8"></th>
-                <th className="py-4 px-2 sm:px-4 font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('rank')}>
+                <th className="py-4 pl-1 pr-0 sm:px-4 font-normal w-5 sm:w-8"></th>
+                <th className="py-4 pl-1 pr-2 sm:px-4 font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('rank')}>
                   Asset<SortIcon column="rank" />
                 </th>
                 <th className="py-4 px-4 text-right font-normal cursor-pointer hover:text-slate-300 select-none" onClick={() => handleSort('price')}>
@@ -248,8 +248,8 @@ export default function Dashboard() {
               {isLoading && coins.length === 0 ? (
                 [...Array(15)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="py-4 px-2 sm:px-4"><div className="w-4 h-4 rounded bg-slate-800" /></td>
-                    <td className="py-4 px-2 sm:px-4">
+                    <td className="py-4 pl-1 pr-0 sm:px-4"><div className="w-4 h-4 rounded bg-slate-800" /></td>
+                    <td className="py-4 pl-1 pr-2 sm:px-4">
                       <div className="flex items-center gap-1 sm:gap-2">
                         <div className="w-4 h-4 rounded bg-slate-800 hidden sm:block" />
                         <div className="w-6 h-6 rounded-full bg-slate-800" />
@@ -275,7 +275,7 @@ export default function Dashboard() {
               ) : (
                 filteredCoins.map((coin) => (
                   <tr key={coin.id} className="group hover:bg-slate-900 transition-colors">
-                    <td className="py-4 pl-2 pr-1 sm:px-4 w-6 sm:w-8">
+                    <td className="py-4 pl-1 pr-0 sm:px-4 w-5 sm:w-8">
                       <button
                         onClick={() => toggleWatchlist(coin.id)}
                         className="p-1 transition-colors block mx-auto"
