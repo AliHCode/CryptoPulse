@@ -24,15 +24,15 @@ Whether you're tracking your investments, analyzing 30-day percentage growth, or
 
 ## ✨ Features
 
-- 1. **Live Market Data**: Real-time ticker updates streamed directly via Binance WebSockets for zero-latency monitoring.
-- 2. **Background Smart Alerts**: Service workers calculate user price targets completely off the main UI thread.
-- 3. **Native OS Push Notifications**: Web Notifications alert you of triggered limits even when the app is in the background.
-- 4. **Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen via modern manifest and Service Worker caching.
-- 5. **Advanced Data Visualization**: Custom integration of Recharts for dynamic Candlesticks, Line Charts, and interactive Portfolio Pie Charts.
-- 6. **Normalized Coin Comparison**: Select any two tracking assets and plot their normalized percentage-growth overlay on exactly intersecting timelines.
-- 7. **Dollar Cost Averaging Engine**: Compute real historical ROI across 3 years of actual OHLCV market data based on custom simulated recurring investments.
-- 8. **Fear & Greed Gauge**: Custom mathematically-driven SVG needle dials mapping global market sentiment directly from `alternative.me`.
-- 9. **Elegant Theming**: Instant Dark/Light mode execution leveraging pure CSS root variables bypassing Tailwind bloat.
+-  **Live Market Data**: Real-time ticker updates streamed directly via Binance WebSockets for zero-latency monitoring.
+-  **Background Smart Alerts**: Service workers calculate user price targets completely off the main UI thread.
+-  **Native OS Push Notifications**: Web Notifications alert you of triggered limits even when the app is in the background.
+-  **Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen via modern manifest and Service Worker caching.
+-  **Advanced Data Visualization**: Custom integration of Recharts for dynamic Candlesticks, Line Charts, and interactive Portfolio Pie Charts.
+-  **Normalized Coin Comparison**: Select any two tracking assets and plot their normalized percentage-growth overlay on exactly intersecting timelines.
+-  **Dollar Cost Averaging Engine**: Compute real historical ROI across 3 years of actual OHLCV market data based on custom simulated recurring investments.
+-  **Fear & Greed Gauge**: Custom mathematically-driven SVG needle dials mapping global market sentiment directly from `alternative.me`.
+-  **Elegant Theming**: Instant Dark/Light mode execution leveraging pure CSS root variables bypassing Tailwind bloat.
 
 ---
 
