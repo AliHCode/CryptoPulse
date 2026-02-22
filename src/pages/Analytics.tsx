@@ -152,8 +152,8 @@ export default function Analytics() {
                 </div>
             </div>
 
-            {/* Volatility, F&G, Portfolio */}
-            <div className="grid lg:grid-cols-3 gap-6">
+            {/* Volatility & F&G */}
+            <div className="grid lg:grid-cols-2 gap-6">
                 {/* Fear & Greed Index */}
                 <div className="border border-slate-800 bg-black">
                     <div className="p-3 border-b border-slate-800 bg-slate-900/50 flex items-center gap-2 text-indigo-400 font-bold uppercase tracking-widest text-xs">
@@ -229,58 +229,6 @@ export default function Analytics() {
                             </div>
                         ))}
                     </div>
-                </div>
-
-                {/* Portfolio Allocation */}
-                <div className="border border-slate-800 bg-black p-6">
-                    <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-xs mb-6">
-                        <Activity className="w-3 h-3 text-amber-500" />
-                        Portfolio Allocation
-                    </div>
-                    {portfolioData.length > 0 ? (
-                        <>
-                            <div className="h-[200px] w-full mt-4">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={portfolioData}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={55}
-                                            outerRadius={80}
-                                            paddingAngle={2}
-                                            dataKey="value"
-                                            stroke="none"
-                                        >
-                                            {portfolioData.map((_entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '0', color: '#fff', fontFamily: 'JetBrains Mono' }}
-                                            formatter={(val: number) => formatCurrency(val)}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                            <div className="mt-4 space-y-1">
-                                {portfolioData.map((item, index) => (
-                                    <div key={item.name} className="flex items-center justify-between text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                            <span className="text-slate-300 uppercase">{item.name}</span>
-                                        </div>
-                                        <span className="text-slate-400 tabular-nums">{formatCurrency(item.value)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-[200px] text-slate-600 text-xs uppercase">
-                            <Activity className="w-6 h-6 mb-2" />
-                            No positions to visualize
-                        </div>
-                    )}
                 </div>
             </div>
 

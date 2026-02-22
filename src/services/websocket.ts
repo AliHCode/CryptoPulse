@@ -125,7 +125,20 @@ export const initializeWebSocket = () => {
 
 export const closeWebSocket = () => {
     if (ws) {
-        ws.close();
+        ws.onclose = null; // Prevent the reconnect timer from firing
+        ws.onerror = null;
+
+        // If the socket is still in the process of connecting (readyState 0),
+        // closing it immediately throws a browser warning. Wait for it or just null it.
+        if (ws.readyState === WebSocket.CONNECTING) {
+            // We can't close it cleanly yet without a warning, so we just remove handlers
+            // and let it naturally die or get garbage collected when the component unmounts
+            ws.onopen = () => {
+                ws?.close();
+            };
+        } else {
+            ws.close();
+        }
         ws = null;
     }
     clearTimeout(reconnectTimer);

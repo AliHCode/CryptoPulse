@@ -16,7 +16,7 @@ export const fetchCoins = async (): Promise<Coin[]> => {
   try {
     // Attempt to hit our secure Vercel Serverless Function proxy first
     // This bypasses the strict Coingecko CORS policy on Vercel deployment
-    const response = await axios.get(`/api/coins`).catch(async (err) => {
+    let response = await axios.get(`/api/coins`).catch(async (err) => {
       console.warn("Vercel Proxy unavailable entirely, reverting to local mock Coingecko call", err);
       // Fallback for local development if the Vercel CLI wasn't started
       return await axios.get(`${COINGECKO_API}/coins/markets`, {
@@ -30,6 +30,26 @@ export const fetchCoins = async (): Promise<Coin[]> => {
         },
       });
     });
+
+    // If Vite development server swallows the request and returns the SPAs index.html
+    if (typeof response.data === 'string') {
+      console.warn("Vite caught proxy request and returned a string (likely HTML). Reverting to direct Coingecko call.");
+      response = await axios.get(`${COINGECKO_API}/coins/markets`, {
+        params: {
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 100,
+          page: 1,
+          sparkline: true,
+          price_change_percentage: '24h,7d',
+        },
+      });
+    }
+
+    if (!Array.isArray(response.data)) {
+      console.error("Expected array from coin fetch but got:", typeof response.data);
+      return [];
+    }
 
     cache = { data: response.data, timestamp: Date.now() };
     return response.data;
@@ -110,9 +130,14 @@ export const fetchCoinOHLC = async (coinId: string, days: number = 7) => {
 
 export const fetchFearAndGreed = async () => {
   try {
-    const response = await axios.get('/api/fng').catch(async () => {
+    let response = await axios.get('/api/fng').catch(async () => {
       return await axios.get('https://api.alternative.me/fng/?limit=1');
     });
+
+    if (typeof response.data === 'string') {
+      console.warn("Vite caught F&G proxy request. Reverting to direct api call.");
+      response = await axios.get('https://api.alternative.me/fng/?limit=1');
+    }
 
     if (response.data && response.data.data && response.data.data.length > 0) {
       return {

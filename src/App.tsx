@@ -11,6 +11,8 @@ import CoinDetail from './pages/CoinDetail';
 import Portfolio from './pages/Portfolio';
 import Alerts from './pages/Alerts';
 import Analytics from './pages/Analytics';
+import News from './pages/News';
+import WhaleAlerts from './pages/WhaleAlerts';
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/whales" element={<WhaleAlerts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

@@ -5,6 +5,8 @@ import { Trash2, Edit2, TrendingUp, TrendingDown, Wallet, Terminal } from 'lucid
 import { clsx } from 'clsx';
 import { analyzePortfolio } from '../services/gemini';
 import { useToastStore } from '../components/Toast';
+import { ethers } from 'ethers';
+import CryptoConverter from '../components/CryptoConverter';
 
 export default function Portfolio() {
   const { portfolio, coins, removeFromPortfolio, updatePortfolioItem } = useCryptoStore();
@@ -12,7 +14,41 @@ export default function Portfolio() {
   const [editAmount, setEditAmount] = useState<string>('');
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const { addToast } = useToastStore();
+
+  const handleConnectWallet = async () => {
+    if (!(window as any).ethereum) {
+      addToast({ title: 'WEB3 ERROR', message: 'METAMASK NOT DETECTED', type: 'error' });
+      return;
+    }
+    setIsConnecting(true);
+    try {
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      if (accounts.length > 0) {
+        const balance = await provider.getBalance(accounts[0]);
+        const ethBalance = parseFloat(ethers.formatEther(balance));
+
+        const ethCoin = coins.find(c => c.id === 'ethereum');
+        if (ethCoin) {
+          // Add or overwrite the Ethereum position with the live on-chain balance
+          // Assuming a cost basis of current price for simplicity, or 0 if preferred
+          // store updatePortfolioItem only takes amount, buyPrice is kept or updated?
+          // Since updatePortfolioItem expects just amount in Portfolio modal usually, wait:
+          // The updatePortfolioItem function in cryptoStore takes (id: string, amount: number) 
+          // but if it doesn't exist it sets buyPrice = current price.
+          updatePortfolioItem('ethereum', ethBalance);
+          addToast({ title: 'WALLET CONNECTED', message: `SYNCED ${ethBalance.toFixed(4)} ETH`, type: 'success' });
+        }
+      }
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+      addToast({ title: 'CONNECTION FAILED', message: 'USER REJECTED REQUEST OR ERROR', type: 'error' });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   // Calculate portfolio stats with P/L
   const portfolioData = portfolio.map(item => {
@@ -84,9 +120,18 @@ export default function Portfolio() {
         </div>
         <h2 className="text-xl font-bold text-white mb-2 uppercase">Portfolio Empty</h2>
         <p className="text-slate-500 max-w-md mb-8 text-xs">NO ASSETS DETECTED. INITIATE POSITIONS VIA MARKET DATA.</p>
-        <a href="/" className="px-6 py-2 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 font-bold uppercase text-xs transition-colors">
-          Initialize Portfolio
-        </a>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <a href="/" className="px-6 py-2 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 font-bold uppercase text-xs transition-colors">
+            Initialize Manually
+          </a>
+          <button
+            onClick={handleConnectWallet}
+            disabled={isConnecting}
+            className="px-6 py-2 bg-indigo-600/20 border border-indigo-500/50 hover:border-indigo-500 text-indigo-400 font-bold uppercase text-xs transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {isConnecting ? <span className="animate-pulse">CONNECTING...</span> : 'CONNECT WEB3 WALLET'}
+          </button>
+        </div>
       </div>
     );
   }
@@ -101,14 +146,24 @@ export default function Portfolio() {
           </h1>
           <p className="text-xs text-slate-500 mt-1">ASSET ALLOCATION & PERFORMANCE METRICS</p>
         </div>
-        <button
-          onClick={handleAnalyze}
-          disabled={analyzing}
-          className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold uppercase transition-all disabled:opacity-50"
-        >
-          {analyzing ? <span className="animate-pulse">PROCESSING...</span> : <Terminal className="w-3 h-3" />}
-          Run Audit
-        </button>
+        <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
+          <button
+            onClick={handleConnectWallet}
+            disabled={isConnecting}
+            className="flex items-center gap-2 px-4 py-1.5 bg-indigo-900/40 border border-indigo-700 hover:border-indigo-500 text-indigo-400 text-xs font-bold uppercase transition-all disabled:opacity-50"
+          >
+            {isConnecting ? <span className="animate-pulse">CONNECTING...</span> : 'Connect Web3'}
+          </button>
+
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold uppercase transition-all disabled:opacity-50"
+          >
+            {analyzing ? <span className="animate-pulse">PROCESSING...</span> : <Terminal className="w-3 h-3" />}
+            Run Audit
+          </button>
+        </div>
       </div>
 
       {/* AI Analysis Terminal */}
@@ -283,6 +338,11 @@ export default function Portfolio() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Converter Widget */}
+          <div className="h-[350px]">
+            <CryptoConverter />
           </div>
         </div>
       </div>
