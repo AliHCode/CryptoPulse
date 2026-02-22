@@ -72,12 +72,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-black text-slate-300 font-mono selection:bg-slate-800 pt-8">
       <NewsTicker />
       {/* Global Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-black sticky top-8 z-50 gap-4">
-        <Link to="/" className="font-bold text-lg tracking-widest text-slate-100 uppercase shrink-0 hover:text-amber-500 transition-colors">
+      <div className="flex items-center justify-between flex-wrap p-2 sm:p-4 border-b border-slate-800 bg-black sticky top-8 z-50 gap-2 sm:gap-4">
+        <Link to="/" className="font-bold text-base sm:text-lg tracking-widest text-slate-100 uppercase shrink-0 hover:text-amber-500 transition-colors">
           CRYPTOPULSE
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="relative hidden sm:block">
+        <div className="flex items-center gap-1 sm:gap-3 flex-1 justify-end">
+          <div className="relative hidden lg:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
@@ -102,7 +102,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               }
             }}
             disabled={analyzing || coins.length === 0}
-            className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold font-mono uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-500 text-amber-500 text-xs font-bold font-mono uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             {analyzing ? (
               <span className="animate-pulse">PROCESSING...</span>
