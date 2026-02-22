@@ -2,13 +2,13 @@ import { GoogleGenAI } from "@google/genai";
 import { Coin } from "../store/cryptoStore";
 
 // Initialize Gemini
-// Note: In a real app, we should handle the case where the key is missing more gracefully in the UI
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+// Use Vite's import.meta.env, and only initialize if the key exists to prevent crashing on load
+const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const analyzeMarket = async (coins: Coin[]) => {
-  if (!apiKey) {
-    throw new Error("Gemini API Key is missing");
+  if (!ai) {
+    throw new Error("Gemini API Key missing! Add VITE_GEMINI_API_KEY to your Vercel Environment Variables.");
   }
 
   const topCoins = coins.slice(0, 10).map(c => ({
@@ -35,7 +35,7 @@ export const analyzeMarket = async (coins: Coin[]) => {
         responseMimeType: "application/json",
       }
     });
-    
+
     return JSON.parse(response.text || '{}');
   } catch (error) {
     console.error("Gemini analysis failed:", error);
@@ -44,7 +44,7 @@ export const analyzeMarket = async (coins: Coin[]) => {
 };
 
 export const analyzePortfolio = async (portfolio: any[], coins: Coin[]) => {
-  if (!apiKey) return null;
+  if (!ai) return null;
 
   // Enrich portfolio with current data
   const enrichedPortfolio = portfolio.map(item => {
