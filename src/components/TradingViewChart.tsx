@@ -10,7 +10,7 @@ export default function TradingViewChart({ symbol }: TradingViewChartProps) {
     const formattedSymbol = `BINANCE:${symbol.toUpperCase()}USDT`;
 
     return (
-        <div className="w-full h-full relative" style={{ minHeight: '400px' }}>
+        <div className="w-full h-full relative" style={{ minHeight: '600px' }}>
             <AdvancedRealTimeChart
                 symbol={formattedSymbol}
                 theme="dark"
