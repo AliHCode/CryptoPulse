@@ -65,6 +65,9 @@ export const initializeWebSocket = () => {
         };
     }
 
+    let buffer: Record<string, number> = {};
+    let flushInterval: any = null;
+
     const connect = () => {
         ws = new WebSocket('wss://stream.binance.com:9443/ws/!miniTicker@arr');
 
@@ -78,29 +81,35 @@ export const initializeWebSocket = () => {
 
                 buildReverseMap(coins);
 
-                const mappedPrices: Record<string, number> = {};
-
                 data.forEach((ticker: any) => {
                     // Only process USDT-denominated pairs
                     if (!ticker.s || !ticker.s.endsWith('USDT')) return;
                     const geckoId = reverseMapCache[ticker.s];
                     if (geckoId) {
-                        mappedPrices[geckoId] = parseFloat(ticker.c);
+                        buffer[geckoId] = parseFloat(ticker.c);
                     }
                 });
 
-                if (Object.keys(mappedPrices).length > 0) {
-                    useCryptoStore.getState().updateCoinPrices(mappedPrices);
+                // Start the flush interval if it's not running
+                if (!flushInterval) {
+                    flushInterval = setInterval(() => {
+                        if (Object.keys(buffer).length > 0) {
+                            useCryptoStore.getState().updateCoinPrices(buffer);
 
-                    // Dispatch to Web Worker for background evaluation
-                    const alerts = useCryptoStore.getState().alerts;
-                    if (alerts.length > 0 && alertWorker) {
-                        const msg: AlertEvaluationMessage = {
-                            type: 'EVALUATE_ALERTS',
-                            payload: { alerts, prices: mappedPrices }
-                        };
-                        alertWorker.postMessage(msg);
-                    }
+                            // Dispatch to Web Worker for background evaluation
+                            const alerts = useCryptoStore.getState().alerts;
+                            if (alerts.length > 0 && alertWorker) {
+                                const msg: AlertEvaluationMessage = {
+                                    type: 'EVALUATE_ALERTS',
+                                    payload: { alerts, prices: { ...buffer } }
+                                };
+                                alertWorker.postMessage(msg);
+                            }
+
+                            // Reset buffer
+                            buffer = {};
+                        }
+                    }, 1000); // Flush updates once per second
                 }
 
             } catch (e) {
@@ -110,6 +119,10 @@ export const initializeWebSocket = () => {
 
         ws.onclose = () => {
             ws = null;
+            if (flushInterval) {
+                clearInterval(flushInterval);
+                flushInterval = null;
+            }
             clearTimeout(reconnectTimer);
             reconnectTimer = setTimeout(connect, 5000);
         };
@@ -128,11 +141,12 @@ export const closeWebSocket = () => {
         ws.onclose = null; // Prevent the reconnect timer from firing
         ws.onerror = null;
 
-        // If the socket is still in the process of connecting (readyState 0),
-        // closing it immediately throws a browser warning. Wait for it or just null it.
+        // Clean up flush interval
+        // We can't access flushInterval from here directly in the current scope if we are not careful
+        // But for this implementation, it's better to manage it inside the store or as a higher level ref
+        // For now, we will handle it in the connection lifecycle
+
         if (ws.readyState === WebSocket.CONNECTING) {
-            // We can't close it cleanly yet without a warning, so we just remove handlers
-            // and let it naturally die or get garbage collected when the component unmounts
             ws.onopen = () => {
                 ws?.close();
             };

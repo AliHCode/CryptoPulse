@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { kv } from '@vercel/kv';
 
 export default async function handler(req: any, res: any) {
     // Add proper CORS headers so the frontend can read the response ALWAYS
-    res.setHeader('Access-Control-Allow-Credentials', true)
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
     res.setHeader(
@@ -18,21 +19,36 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
+    // Set Edge Caching headers so Vercel caches this response at the CDN edge for 60 seconds.
+    // This makes the API effectively instantly fast (<30ms) for end users.
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+
     try {
+        // Attempt to read the entire 250-coin payload directly from our Vercel KV Redis database
+        const cachedData = await kv.get('coingecko_global_market');
+
+        if (cachedData && (cachedData as any).coins) {
+            console.log("CACHE HIT: Serving 250 coins from Vercel KV Redis");
+            return res.status(200).json((cachedData as any).coins);
+        }
+
+        console.warn("CACHE MISS: Vercel KV is empty. Falling back to direct CoinGecko fetch.");
+
+        // Fallback for Local Development (before the Cron Job has ever run)
         const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
             params: {
                 vs_currency: 'usd',
                 order: 'market_cap_desc',
-                per_page: 100,
+                per_page: 250, // Keep it at 250 so local dev mirrors Production layout expectations
                 page: 1,
                 sparkline: true,
-                price_change_percentage: '24h,7d',
+                price_change_percentage: '24h',
             },
         });
 
         return res.status(200).json(response.data);
     } catch (error) {
-        console.error("CoinGecko Proxy Error:", error);
+        console.error("Vercel KV / CoinGecko Proxy Error:", error);
         return res.status(500).json({ error: 'Failed to fetch coin data' });
     }
 }

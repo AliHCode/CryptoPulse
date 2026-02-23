@@ -17,6 +17,8 @@ export default function Dashboard() {
   const [tab, setTab] = useState<'all' | 'watchlist'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('rank');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   // Listen for analysis results from the global header button
   useEffect(() => {
@@ -27,10 +29,18 @@ export default function Dashboard() {
     return () => window.removeEventListener('ai-analysis-ready', handler);
   }, []);
 
-  // Reset to All tab when searching
+  // Reset to All tab and page 1 when searching
   useEffect(() => {
-    if (searchQuery) setTab('all');
+    if (searchQuery) {
+      setTab('all');
+      setCurrentPage(1);
+    }
   }, [searchQuery]);
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tab]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -56,7 +66,7 @@ export default function Dashboard() {
           c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           c.symbol.toLowerCase().includes(searchQuery.toLowerCase())
         )
-        : coins.slice(0, 50);
+        : coins;
 
     // Sort
     const sorted = [...base].sort((a, b) => {
@@ -73,6 +83,12 @@ export default function Dashboard() {
 
     return sorted;
   }, [coins, searchQuery, tab, watchlist, sortKey, sortDir]);
+
+  const totalPages = Math.ceil(filteredCoins.length / itemsPerPage);
+  const paginatedCoins = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredCoins.slice(start, start + itemsPerPage);
+  }, [filteredCoins, currentPage, itemsPerPage]);
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(val);
@@ -205,7 +221,7 @@ export default function Dashboard() {
             tab === 'all' ? "text-amber-500 border-amber-500" : "text-slate-500 border-transparent hover:text-slate-300"
           )}
         >
-          All Assets <span className="text-[10px] text-slate-600 ml-1">({coins.length > 50 && !searchQuery ? 50 : filteredCoins.length})</span>
+          All Assets <span className="text-[10px] text-slate-600 ml-1">({coins.length})</span>
         </button>
         <button
           onClick={() => setTab('watchlist')}
@@ -273,7 +289,7 @@ export default function Dashboard() {
                   </td>
                 </tr>
               ) : (
-                filteredCoins.map((coin) => (
+                paginatedCoins.map((coin) => (
                   <tr key={coin.id} className="group hover:bg-slate-900 transition-colors">
                     <td className="py-4 pl-1 pr-0 sm:px-4 w-5 sm:w-8">
                       <button
@@ -344,6 +360,53 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border border-slate-800 bg-black p-4 font-mono">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-1.5 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase hover:border-amber-500 hover:text-amber-500 disabled:opacity-30 disabled:hover:border-slate-700 disabled:hover:text-slate-400 transition-all font-mono"
+          >
+            Previous
+          </button>
+
+          <div className="flex items-center gap-2">
+            {[...Array(totalPages)].map((_, i) => {
+              const pageIdx = i + 1;
+              // Show limited pages if many
+              if (totalPages > 5 && Math.abs(pageIdx - currentPage) > 1 && pageIdx !== 1 && pageIdx !== totalPages) {
+                if (pageIdx === 2 || pageIdx === totalPages - 1) return <span key={i} className="text-slate-700">...</span>;
+                return null;
+              }
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(pageIdx)}
+                  className={clsx(
+                    "w-8 h-8 flex items-center justify-center text-[10px] font-bold border transition-all",
+                    currentPage === pageIdx
+                      ? "bg-amber-500 border-amber-500 text-black"
+                      : "border-slate-800 text-slate-500 hover:border-slate-600"
+                  )}
+                >
+                  {pageIdx}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-1.5 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase hover:border-amber-500 hover:text-amber-500 disabled:opacity-30 disabled:hover:border-slate-700 disabled:hover:text-slate-400 transition-all"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
