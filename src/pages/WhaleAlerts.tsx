@@ -141,7 +141,7 @@ export default function WhaleAlerts() {
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-bold text-white">
-                                                    {tx.symbol.substring(0, 3)}
+                                                    {(tx.symbol || 'UNK').substring(0, 3)}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-sm font-bold text-slate-200 uppercase">{tx.symbol}</span>
@@ -179,11 +179,11 @@ export default function WhaleAlerts() {
 
                                         <td className="p-4 text-right">
                                             <a
-                                                href={`#${tx.hash}`}
+                                                href={`#${tx.hash || ''}`}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-700 text-[10px] text-slate-400 font-bold font-mono hover:text-indigo-400 hover:border-indigo-500 transition-colors uppercase"
                                                 onClick={(e) => e.preventDefault()}
                                             >
-                                                {tx.hash.substring(0, 8)}...
+                                                {(tx.hash || 'UNKNOWN').substring(0, 8)}...
                                                 <ExternalLink className="w-3 h-3" />
                                             </a>
                                         </td>

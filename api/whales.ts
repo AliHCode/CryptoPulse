@@ -26,10 +26,12 @@ const generateMockWhales = () => {
             id: `whale_${Date.now()}_${i}`,
             blockchain: asset.toLowerCase(),
             symbol: asset,
+            transaction_type: 'transfer',
+            hash: `0x${Math.random().toString(16).substring(2, 40)}`,
             amount: amount,
             amount_usd: amount_usd,
-            from: { owner: from, address: `0x${Math.random().toString(16).substr(2, 40)}` },
-            to: { owner: to, address: `0x${Math.random().toString(16).substr(2, 40)}` },
+            from: { owner: from, owner_type: 'exchange', address: `0x${Math.random().toString(16).substring(2, 40)}` },
+            to: { owner: to, owner_type: 'exchange', address: `0x${Math.random().toString(16).substring(2, 40)}` },
             timestamp: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 3600) // Within last hour
         };
     }).sort((a, b) => b.timestamp - a.timestamp);
