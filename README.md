@@ -2,9 +2,9 @@
 
 # ⚡ CryptoPulse
 Your high-performance, real-time cryptocurrency trading terminal & portfolio tracker.<br>
-Built with ❤️ using React, Tailwind v4 & Vite
+Built with ❤️ using React 19, Tailwind v4 & Vite 6
 
-[![React](https://img.shields.io/badge/React-18.x-61dafb?style=flat-square&logo=react)](https://reactjs.org/)
+[![React](https://img.shields.io/badge/React-19.x-61dafb?style=flat-square&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
@@ -16,39 +16,46 @@ Built with ❤️ using React, Tailwind v4 & Vite
 
 ## 📖 Overview
 
-**CryptoPulse** is a professional-grade cryptocurrency tracking, analytics, and portfolio management terminal. Designed to mimic the high-performance interfaces used by enterprise traders, it leverages modern Web APIs to deliver real-time market intelligence without dropping frames.
+**CryptoPulse** is a professional-grade cryptocurrency tracking, analytics, and portfolio management terminal. Designed to mimic the high-performance interfaces used by enterprise traders, it leverages modern Web APIs and Vercel's Edge infrastructure to deliver real-time market intelligence without dropping frames.
 
-Whether you're tracking your investments, analyzing 30-day percentage growth, or running historical Dollar Cost Averaging (DCA) simulations, CryptoPulse brings all the tools you need into one seamless, PWA-installable dashboard.
+Whether you're tracking whale movements, analyzing charts via TradingView, or monitoring your Web3 portfolio, CryptoPulse brings enterprise-level tools into one seamless, PWA-installable dashboard.
 
 ---
 
 ## ✨ Features
 
--  **Live Market Data**: Real-time ticker updates streamed directly via Binance WebSockets for zero-latency monitoring.
--  **Background Smart Alerts**: Service workers calculate user price targets completely off the main UI thread.
--  **Native OS Push Notifications**: Web Notifications alert you of triggered limits even when the app is in the background.
--  **Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen via modern manifest and Service Worker caching.
--  **Advanced Data Visualization**: Custom integration of Recharts for dynamic Candlesticks, Line Charts, and interactive Portfolio Pie Charts.
--  **Normalized Coin Comparison**: Select any two tracking assets and plot their normalized percentage-growth overlay on exactly intersecting timelines.
--  **Dollar Cost Averaging Engine**: Compute real historical ROI across 3 years of actual OHLCV market data based on custom simulated recurring investments.
--  **Fear & Greed Gauge**: Custom mathematically-driven SVG needle dials mapping global market sentiment directly from `alternative.me`.
--  **Elegant Theming**: Instant Dark/Light mode execution leveraging pure CSS root variables bypassing Tailwind bloat.
+-  **🚀 Enterprise Scaling Architecture**: Uses Vercel Cron Scrapers and Vercel KV (Redis) to bypass API rate limits and serve data via global Edge Caching.
+-  **⚡ Real-Time Price Streaming**: Live ticker updates via Binance WebSockets with **1s Throughput Throttling** to ensure smooth UI performance under high volatility.
+-  **📡 Smart Money Radar**: Real-time tracking of large-cap whale transactions (> $5M) across multiple blockchains.
+-  **📈 TradingView Integration**: Interactive, professional-grade candlestick charts for technical analysis on every asset.
+-  **👛 Web3 Portfolio Tracking**: Connect your Ethereum/Web3 wallet via ethers.js to monitor balances and PkL in real-time.
+-  **🧠 AI Market Analysis**: Integrated Google Gemini AI to analyze market trends and provide instant sentiment reports.
+-  **📲 Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen with offline asset caching.
+-  **🔔 Smart Background Alerts**: Dedicated Web Workers evaluate price alerts off-thread and trigger native OS push notifications.
 
 ---
 
 ## 🛠️ Tech Stack & Architecture
 
-- **Frontend Framework**: React 18, Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS (v4), clsx
-- **State Management**: Zustand (Persisted via localStorage)
-- **Charting Engine**: Recharts, Lightweight Charts
-- **Networking/Data**: Axios, Native WebSockets, Coingecko API, Binance API
-- **Tooling**: ESLint, PostCSS, vite-plugin-pwa
+- **Frontend**: React 19, Vite 6, Zustand
+- **Styling**: Tailwind CSS v4 (Modern, utility-first)
+- **Data Persistence**: Vercel KV (Redis) + LocalStorage
+- **Infrastructure**: Vercel Serverless Functions + Vercel Cron Jobs
+- **Analytics**: Recharts, Lightweight Charts, TradingView Widgets
+- **Wallets**: Ethers.js v6
 
-### 🧠 Architecture Highlights
-* **Off-Main-Thread Processing**: Dedicated `alertWorker.ts` handles massive price-alert evaluations to ensure the UI remains buttery smooth.
-* **Component-Level Rendering**: Carefully mapped Zustand state ensures that WebSocket price updates only re-render the exact `PriceFlash` components on screen, not the entire table.
+### 🧠 System Architecture
+
+CryptoPulse uses a "Scrape & Cache" architecture to ensure 100% uptime and zero rate-limiting errors.
+
+```mermaid
+graph LR
+    CG[CoinGecko API] -->|Cron Job Every 5m| S[Vercel Scraper]
+    S -->|Store| KV[(Vercel KV Redis)]
+    KV -->|Cache Hit| P[API Proxy]
+    P -->|Edge Cache| C[Client Browser]
+    B[Binance WS] -->|Throttled Stream| C
+```
 
 ---
 
@@ -57,7 +64,7 @@ Whether you're tracking your investments, analyzing 30-day percentage growth, or
 ### Prerequisites
 
 - Node.js (v18.0.0 or higher)
-- npm or yarn
+- A Vercel Account (for KV and Serverless features)
 
 ### Installation Steps
 
@@ -72,33 +79,19 @@ Whether you're tracking your investments, analyzing 30-day percentage growth, or
    npm install
    ```
 
-3. **Start the development server**
+3. **Configure Environment Variables**
+   Create a `.env` file for Vercel KV and API keys:
+   ```bash
+   KV_REST_API_URL=your_vercel_kv_url
+   KV_REST_API_TOKEN=your_vercel_kv_token
+   WHALE_ALERT_API_KEY=your_key (optional)
+   VITE_GEMINI_API_KEY=your_key
+   ```
+
+4. **Start the development server**
    ```bash
    npm run dev
    ```
-
-4. **Build for production**
-   ```bash
-   npm run build
-   ```
-
----
-
-## 📸 Screenshots
-
-*(Add screenshots of your Dashboard, Analytics Tool, and Light/Dark mode here!)*
-
----
-
-## 🤝 Contributing
-
-Contributions make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ---
 
