@@ -304,7 +304,7 @@ export default function Portfolio() {
           <div className="bg-black border border-slate-800 p-6 h-96">
             <h3 className="text-xs font-bold text-slate-400 uppercase mb-6">Allocation Distribution</h3>
             <div className="h-[250px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                 <PieChart>
                   <Pie
                     data={portfolioData}
