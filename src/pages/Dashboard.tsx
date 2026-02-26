@@ -47,7 +47,7 @@ export default function Dashboard() {
   // Scroll to table top when page changes
   useEffect(() => {
     if (tableTopRef.current) {
-      const yOffset = -20; // Slight padding above the tabs
+      const yOffset = -120; // Padding to clear the site header and show tabs
       const y = tableTopRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
