@@ -1,0 +1,23 @@
+name: CryptoPulse Data Scraper
+
+on:
+  schedule:
+    # Runs every 5 minutes
+    - cron: '*/5 * * * *'
+  # Allows triggering this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Vercel Scraper API
+        env:
+          # In your GitHub repository, go to Settings -> Secrets and variables -> Actions
+          # Click "New repository secret"
+          # Name: CRON_SECRET, Value: (Your chosen secret key)
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -X GET "https://crypto-pulse-wine.vercel.app/api/scrape" \
+               -H "Authorization: Bearer $CRON_SECRET" \
+               -w "\nHTTP Status: %{http_code}\n"
