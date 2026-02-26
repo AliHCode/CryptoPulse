@@ -25,14 +25,23 @@ export default async function handler(req: any, res: any) {
 
     try {
         // Attempt to read the entire 250-coin payload directly from our Vercel KV Redis database
-        const cachedData = await kv.get('coingecko_global_market');
+        let cachedData = null;
+        try {
+            if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+                cachedData = await kv.get('coingecko_global_market');
+            } else {
+                console.warn("Vercel KV Env variables missing. Skipping cache read.");
+            }
+        } catch (kvError) {
+            console.warn("Vercel KV Read Error (skipping cache):", kvError);
+        }
 
         if (cachedData && (cachedData as any).coins) {
             console.log("CACHE HIT: Serving 250 coins from Vercel KV Redis");
             return res.status(200).json((cachedData as any).coins);
         }
 
-        console.warn("CACHE MISS: Vercel KV is empty. Falling back to direct CoinGecko fetch.");
+        console.warn("CACHE MISS: Vercel KV is empty or unavailable. Falling back to direct CoinGecko fetch.");
 
         // Fallback for Local Development (before the Cron Job has ever run)
         const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
