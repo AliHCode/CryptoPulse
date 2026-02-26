@@ -30,15 +30,18 @@ export default async function handler(req: any, res: any) {
         const latestData = response.data;
         const cacheTimestamp = Date.now();
 
-        // Save the result directly into Vercel KV Redis
-        // Overwrites the existing key "coingecko_global_market"
-        await kv.set('coingecko_global_market', {
-            lastUpdated: cacheTimestamp,
-            coins: latestData
-        });
-
-        console.log(`CRON JOB: Successfully scraped and cached ${latestData.length} coins at ${new Date(cacheTimestamp).toISOString()}`);
-        return res.status(200).json({ success: true, count: latestData.length, savedAt: cacheTimestamp });
+        try {
+            // Save the result directly into Vercel KV Redis
+            await kv.set('coingecko_global_market', {
+                lastUpdated: cacheTimestamp,
+                coins: latestData
+            });
+            console.log(`CRON JOB: Successfully scraped and cached ${latestData.length} coins at ${new Date(cacheTimestamp).toISOString()}`);
+            return res.status(200).json({ success: true, count: latestData.length, savedAt: cacheTimestamp });
+        } catch (kvError) {
+            console.error("CRON JOB FAILED: Could not write to Vercel KV Database (Check your KV_REST_API variables)", kvError);
+            return res.status(500).json({ error: 'Failed to write to Vercel KV' });
+        }
 
     } catch (error) {
         console.error("CRON JOB FAILED: CoinGecko API Error", error);
