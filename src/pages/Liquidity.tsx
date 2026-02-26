@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Activity } from 'lucide-react';
+import LiquidationHeatmap from '../components/LiquidationHeatmap';
 
 interface DepthLevel {
     price: number;
@@ -125,6 +126,10 @@ export default function Liquidity() {
                     <p>ESTABLISHING DIRECT EXCHANGE CONNECTION...</p>
                 </div>
             )}
+
+            <div className="mt-8 pt-8 border-t border-slate-800">
+                <LiquidationHeatmap asset={asset} />
+            </div>
         </div>
     );
 }
