@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PieChart, Bell, TrendingUp, Menu, X, BarChart3, Search, Terminal, Sun, Moon, Newspaper, Radar } from 'lucide-react';
+import { LayoutDashboard, PieChart, Bell, TrendingUp, Menu, X, BarChart3, Search, Terminal, Sun, Moon, Newspaper, Radar, Layers } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCryptoStore } from '../store/cryptoStore';
 import { fetchCoins } from '../services/api';
@@ -76,6 +76,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { to: '/analytics', icon: BarChart3, label: 'Analytics' },
     { to: '/news', icon: Newspaper, label: 'News' },
     { to: '/whales', icon: Radar, label: 'Whale Alerts' },
+    { to: '/liquidity', icon: Layers, label: 'Liquidity Heatmap' },
     { to: '/alerts', icon: Bell, label: 'Price Alerts' },
   ];
   const filteredSearch = searchQuery.trim() === '' ? [] : coins.filter(c =>

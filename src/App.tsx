@@ -13,6 +13,7 @@ import Alerts from './pages/Alerts';
 import Analytics from './pages/Analytics';
 import News from './pages/News';
 import WhaleAlerts from './pages/WhaleAlerts';
+import Liquidity from './pages/Liquidity';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/news" element={<News />} />
           <Route path="/whales" element={<WhaleAlerts />} />
+          <Route path="/liquidity" element={<Liquidity />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
