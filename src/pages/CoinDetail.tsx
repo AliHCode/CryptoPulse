@@ -33,8 +33,13 @@ export default function CoinDetail() {
   const [alertPercent, setAlertPercent] = useState('5');
 
   useEffect(() => {
+    if (id) {
+      window.scrollTo(0, 0);
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (!id) return;
-    window.scrollTo(0, 0);
 
     const loadHistory = async () => {
       setLoading(true);

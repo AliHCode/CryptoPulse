@@ -42,6 +42,11 @@ export default function Dashboard() {
     setCurrentPage(1);
   }, [tab]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
       setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -363,7 +368,7 @@ export default function Dashboard() {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center pt-4 pb-8 font-mono">
+        <div className="flex items-center justify-center pt-3 pb-6 font-mono">
           <div className="flex items-center gap-2">
             {[...Array(totalPages)].map((_, i) => {
               const pageIdx = i + 1;
