@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useCryptoStore } from '../store/cryptoStore';
 import { Search, ArrowUpRight, ArrowDownRight, Terminal, Activity, Star, ChevronUp, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -37,14 +37,20 @@ export default function Dashboard() {
     }
   }, [searchQuery]);
 
+  const tableTopRef = useRef<HTMLDivElement>(null);
+
   // Reset page when tab changes
   useEffect(() => {
     setCurrentPage(1);
   }, [tab]);
 
-  // Scroll to top when page changes
+  // Scroll to table top when page changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (tableTopRef.current) {
+      const yOffset = -20; // Slight padding above the tabs
+      const y = tableTopRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
   }, [currentPage]);
 
   const handleSort = (key: SortKey) => {
@@ -218,7 +224,7 @@ export default function Dashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-0 border-b border-slate-800 font-mono">
+      <div ref={tableTopRef} className="flex items-center gap-0 border-b border-slate-800 font-mono">
         <button
           onClick={() => setTab('all')}
           className={clsx(
@@ -368,7 +374,7 @@ export default function Dashboard() {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center pt-3 pb-6 font-mono">
+        <div className="flex items-center justify-center pt-2 pb-6 font-mono -mt-[1px]">
           <div className="flex items-center gap-2">
             {[...Array(totalPages)].map((_, i) => {
               const pageIdx = i + 1;
