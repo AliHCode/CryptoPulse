@@ -363,15 +363,7 @@ export default function Dashboard() {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border border-slate-800 bg-black p-4 font-mono">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-1.5 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase hover:border-amber-500 hover:text-amber-500 disabled:opacity-30 disabled:hover:border-slate-700 disabled:hover:text-slate-400 transition-all font-mono"
-          >
-            Previous
-          </button>
-
+        <div className="flex items-center justify-center pt-4 pb-8 font-mono">
           <div className="flex items-center gap-2">
             {[...Array(totalPages)].map((_, i) => {
               const pageIdx = i + 1;
@@ -397,14 +389,6 @@ export default function Dashboard() {
               );
             })}
           </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-1.5 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase hover:border-amber-500 hover:text-amber-500 disabled:opacity-30 disabled:hover:border-slate-700 disabled:hover:text-slate-400 transition-all"
-          >
-            Next
-          </button>
         </div>
       )}
     </div>
