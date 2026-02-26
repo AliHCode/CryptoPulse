@@ -221,7 +221,7 @@ export default function Dashboard() {
             tab === 'all' ? "text-amber-500 border-amber-500" : "text-slate-500 border-transparent hover:text-slate-300"
           )}
         >
-          All Assets <span className="text-[10px] text-slate-600 ml-1">({coins.length})</span>
+          All Assets
         </button>
         <button
           onClick={() => setTab('watchlist')}
