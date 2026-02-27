@@ -55,18 +55,31 @@ export default function WhaleAlerts() {
         const cryptos = ['BTC', 'ETH', 'USDT', 'USDC', 'XRP', 'DOGE', 'SOL'];
         const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Bitfinex', 'Unknown Wallet'];
         const types = ['transfer', 'transfer', 'transfer', 'mint', 'burn'];
+        const btcHash = 'f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
+        const ethHash = '0x5d08b3ba2fc01633513364214f08e434cd41584db254ec9d936bb4fa22dfc9aa';
+        const solHash = '36GntFfquT6fA1CEX7yFh7iZYp16wFR3WToEwK4oG1VnS5w7GzD9L9Hw3PXXPZ7a22hJqj1XWv24JvU9jUvK9C1V';
 
         return Array.from({ length: 15 }).map((_, i) => {
             const symbol = cryptos[Math.floor(Math.random() * cryptos.length)];
             const amountUsd = Math.floor(Math.random() * 95000000) + 5000000; // $5M to $100M
             const price = symbol === 'BTC' ? 65000 : symbol === 'ETH' ? 3500 : symbol === 'SOL' ? 150 : 1;
 
+            let blockchain = 'ethereum';
+            let hash = ethHash;
+            if (symbol === 'BTC') {
+                blockchain = 'bitcoin';
+                hash = btcHash;
+            } else if (symbol === 'SOL') {
+                blockchain = 'solana';
+                hash = solHash;
+            }
+
             return {
                 id: `mock-${Date.now()}-${i}`,
-                blockchain: symbol === 'BTC' ? 'bitcoin' : symbol === 'SOL' ? 'solana' : 'ethereum',
+                blockchain: blockchain,
                 symbol: symbol,
                 transaction_type: types[Math.floor(Math.random() * types.length)],
-                hash: `0x${Math.random().toString(16).slice(2, 40)}...`,
+                hash: hash,
                 from: {
                     address: `0x${Math.random().toString(16).slice(2, 12)}...`,
                     owner_type: Math.random() > 0.5 ? 'exchange' : 'unknown',
