@@ -163,9 +163,9 @@ export default function CoinDetail() {
       </div>
 
       {/* Main Analysis Section */}
-      <div className={clsx("grid gap-6", isQuantView ? "lg:grid-cols-4" : "lg:grid-cols-4")}>
+      <div className="grid lg:grid-cols-4 gap-6">
         {/* Chart Section */}
-        <div className={clsx("border border-slate-800 bg-black p-6 flex flex-col min-h-[500px]", isQuantView ? "lg:col-span-3" : "lg:col-span-4")}>
+        <div className="border border-slate-800 bg-black p-6 flex flex-col min-h-[500px] lg:col-span-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-sm font-bold text-amber-500 uppercase flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -280,16 +280,19 @@ export default function CoinDetail() {
           </div>
         </div>
 
-        {/* Quant Sidebar Section */}
-        {isQuantView && (
-          <div className="lg:col-span-1 h-[600px] lg:h-auto">
-            <QuantSidebar symbol={coin.symbol} />
-          </div>
-        )}
+        {/* Right Sidebar Section */}
+        <div className="lg:col-span-1 flex flex-col gap-6">
+          {/* Quant Sidebar Section */}
+          {isQuantView && (
+            <div className="h-[400px]">
+              <QuantSidebar symbol={coin.symbol} />
+            </div>
+          )}
 
-        {/* Order Book Section */}
-        <div className={clsx(isQuantView ? "lg:col-span-1" : "lg:col-span-1", "h-[500px]")}>
-          <OrderBook symbol={coin.symbol} coinId={coin.id} />
+          {/* Order Book Section */}
+          <div className="flex-1 min-h-[500px]">
+            <OrderBook symbol={coin.symbol} coinId={coin.id} />
+          </div>
         </div>
       </div>
 
