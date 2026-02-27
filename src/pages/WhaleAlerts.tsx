@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Radar, Activity, ExternalLink, ArrowRight, ArrowLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,86 +19,70 @@ interface WhaleTransaction {
 export default function WhaleAlerts() {
     const [transactions, setTransactions] = useState<WhaleTransaction[]>([]);
     const [loading, setLoading] = useState(true);
+    const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const fetchWhales = async () => {
-            try {
-                let response = await axios.get('/api/whales').catch(() => null);
+        // Connect to Binance Spot WebSocket for major pairs
+        const streams = ['btcusdt', 'ethusdt', 'solusdt', 'xrpusdt', 'dogeusdt', 'bnbusdt']
+            .map(s => `${s}@aggTrade`)
+            .join('/');
 
-                if (response && typeof response.data === 'string') {
-                    console.warn("Vite caught Whale proxy request. Need real API key for local dev without Vercel.");
-                    // In a highly robust environment, we'd have a local fallback mock here if the API key isn't public
-                    throw new Error("Direct API unavailable locally without proxy");
-                }
+        const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
 
-                if (response && response.data && response.data.transactions) {
-                    setTransactions(response.data.transactions);
-                } else {
-                    // Generate Mock Data if proxy fails or returns empty (e.g., no API key configured)
-                    const mockData = generateMockWhaleData();
-                    setTransactions(mockData);
+        ws.onopen = () => {
+            setLoading(false);
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.e === 'aggTrade') {
+                const price = parseFloat(data.p);
+                const quantity = parseFloat(data.q);
+                const amountUsd = price * quantity;
+
+                // Threshold: Only show trades > $500,000 USD to ensure constant dopamine without overwhelming the UI
+                if (amountUsd > 500000) {
+                    const symbol = data.s.replace('USDT', '');
+                    const isSell = data.m; // m: true means the buyer was the market maker (so it was a market sell)
+
+                    const newTx: WhaleTransaction = {
+                        id: `binance-${data.a}`,
+                        blockchain: 'Binance Exchange',
+                        symbol: symbol,
+                        transaction_type: isSell ? 'SELL EXECUTION' : 'BUY EXECUTION',
+                        hash: data.a.toString(), // Aggregate Trade ID
+                        from: {
+                            address: isSell ? 'Market Seller' : 'Binance Orderbook',
+                            owner_type: 'exchange',
+                            owner: 'Binance'
+                        },
+                        to: {
+                            address: isSell ? 'Binance Orderbook' : 'Market Buyer',
+                            owner_type: 'exchange',
+                            owner: 'Binance'
+                        },
+                        timestamp: Math.floor(data.T / 1000),
+                        amount: quantity,
+                        amount_usd: amountUsd
+                    };
+
+                    setTransactions(prev => {
+                        const next = [newTx, ...prev];
+                        if (next.length > 50) next.pop(); // Keep last 50 alerts
+                        return next;
+                    });
                 }
-            } catch (error) {
-                console.error("Failed to load whale data, using mock:", error);
-                setTransactions(generateMockWhaleData());
-            } finally {
-                setLoading(false);
             }
         };
 
-        fetchWhales();
-        const interval = setInterval(fetchWhales, 60000); // Check every minute
-        return () => clearInterval(interval);
+        wsRef.current = ws;
+
+        return () => {
+            ws.close();
+        };
     }, []);
 
-    const generateMockWhaleData = (): WhaleTransaction[] => {
-        const cryptos = ['BTC', 'ETH', 'USDT', 'USDC', 'XRP', 'DOGE', 'SOL'];
-        const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Bitfinex', 'Unknown Wallet'];
-        const types = ['transfer', 'transfer', 'transfer', 'mint', 'burn'];
-        const btcHash = 'f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
-        const ethHash = '0x5d08b3ba2fc01633513364214f08e434cd41584db254ec9d936bb4fa22dfc9aa';
-        const solHash = '36GntFfquT6fA1CEX7yFh7iZYp16wFR3WToEwK4oG1VnS5w7GzD9L9Hw3PXXPZ7a22hJqj1XWv24JvU9jUvK9C1V';
-
-        return Array.from({ length: 15 }).map((_, i) => {
-            const symbol = cryptos[Math.floor(Math.random() * cryptos.length)];
-            const amountUsd = Math.floor(Math.random() * 95000000) + 5000000; // $5M to $100M
-            const price = symbol === 'BTC' ? 65000 : symbol === 'ETH' ? 3500 : symbol === 'SOL' ? 150 : 1;
-
-            let blockchain = 'ethereum';
-            let hash = ethHash;
-            if (symbol === 'BTC') {
-                blockchain = 'bitcoin';
-                hash = btcHash;
-            } else if (symbol === 'SOL') {
-                blockchain = 'solana';
-                hash = solHash;
-            }
-
-            return {
-                id: `mock-${Date.now()}-${i}`,
-                blockchain: blockchain,
-                symbol: symbol,
-                transaction_type: types[Math.floor(Math.random() * types.length)],
-                hash: hash,
-                from: {
-                    address: `0x${Math.random().toString(16).slice(2, 12)}...`,
-                    owner_type: Math.random() > 0.5 ? 'exchange' : 'unknown',
-                    owner: Math.random() > 0.5 ? exchanges[Math.floor(Math.random() * exchanges.length)] : undefined
-                },
-                to: {
-                    address: `0x${Math.random().toString(16).slice(2, 12)}...`,
-                    owner_type: Math.random() > 0.5 ? 'exchange' : 'unknown',
-                    owner: Math.random() > 0.5 ? exchanges[Math.floor(Math.random() * exchanges.length)] : undefined
-                },
-                timestamp: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 3600),
-                amount: amountUsd / price,
-                amount_usd: amountUsd
-            };
-        }).sort((a, b) => b.timestamp - a.timestamp);
-    };
-
     const formatAddress = (entity: { address: string; owner_type: string; owner?: string }) => {
-        if (entity.owner) return entity.owner;
         return entity.address;
     };
 
@@ -110,17 +94,8 @@ export default function WhaleAlerts() {
         }).format(val);
     };
 
-    const getBlockExplorerUrl = (blockchain: string, hash: string) => {
-        if (!hash) return '#';
-        const net = blockchain?.toLowerCase() || '';
-        if (net.includes('bitcoin') || net.includes('btc')) return `https://mempool.space/tx/${hash}`;
-        if (net.includes('ethereum') || net.includes('erc20') || net.includes('eth')) return `https://etherscan.io/tx/${hash}`;
-        if (net.includes('solana') || net.includes('sol')) return `https://solscan.io/tx/${hash}`;
-        if (net.includes('tron') || net.includes('trx')) return `https://tronscan.org/#/transaction/${hash}`;
-        if (net.includes('ripple') || net.includes('xrp')) return `https://xrpscan.com/tx/${hash}`;
-        if (net.includes('dogecoin') || net.includes('doge')) return `https://dogechain.info/tx/${hash}`;
-        // Generic fallback
-        return `https://blockchair.com/search?q=${hash}`;
+    const getBlockExplorerUrl = (symbol: string) => {
+        return `https://www.binance.com/en/trade/${symbol}_USDT`;
     };
 
     return (
@@ -129,20 +104,20 @@ export default function WhaleAlerts() {
                 <div>
                     <h1 className="text-xl font-bold text-white tracking-tight uppercase flex items-center gap-2">
                         <Radar className="w-5 h-5 text-indigo-500" />
-                        Smart Money Radar
+                        Whale Execution Radar
                     </h1>
-                    <p className="text-xs text-slate-500 mt-1">REAL-TIME LARGE CAP BLOCKCHAIN TRANSACTIONS {'>'} $5M USD</p>
+                    <p className="text-xs text-slate-500 mt-1">REAL-TIME LARGE CAP EXCHANGE EXECUTIONS {'>'} $500K USD</p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 text-indigo-400 text-[10px] font-bold uppercase transition-all">
                     <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                    MONITORING BLOCKCHAIN
+                    MONITORING BINANCE ORDERFLOW
                 </div>
             </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center p-20 text-slate-600 text-xs font-mono animate-pulse">
                     <Activity className="w-8 h-8 mb-4 text-indigo-500/50" />
-                    SCANNING LEDGERS...
+                    CONNECTING TO LIVE ORDERFLOW...
                 </div>
             ) : (
                 <div className="border border-slate-800 bg-black overflow-hidden relative">
@@ -171,7 +146,7 @@ export default function WhaleAlerts() {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-sm font-bold text-slate-200 uppercase">{tx.symbol}</span>
-                                                    <span className="text-[10px] text-slate-500 uppercase">{tx.blockchain}</span>
+                                                    <span className={`text-[10px] uppercase font-bold ${tx.transaction_type.includes('SELL') ? 'text-rose-500' : 'text-emerald-500'}`}>{tx.transaction_type}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -205,12 +180,12 @@ export default function WhaleAlerts() {
 
                                         <td className="p-4 text-right">
                                             <a
-                                                href={getBlockExplorerUrl(tx.blockchain, tx.hash)}
+                                                href={getBlockExplorerUrl(tx.symbol)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-700 text-[10px] text-slate-400 font-bold font-mono hover:text-indigo-400 hover:border-indigo-500 transition-colors uppercase"
                                             >
-                                                {(tx.hash || 'UNKNOWN').substring(0, 8)}...
+                                                Chart
                                                 <ExternalLink className="w-3 h-3" />
                                             </a>
                                         </td>
