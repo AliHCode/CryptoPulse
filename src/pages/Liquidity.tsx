@@ -60,13 +60,13 @@ export default function Liquidity() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div className="flex items-center gap-3">
                     <Layers className="w-6 h-6 text-amber-500" />
-                    <h1 className="text-lg font-bold tracking-widest text-slate-100 uppercase">Live Liquidity Heatmap</h1>
+                    <h1 className="text-lg font-bold tracking-widest text-slate-100 uppercase">Live Order Book</h1>
                 </div>
 
                 <select
                     value={asset}
                     onChange={(e) => setAsset(e.target.value as 'BTC' | 'ETH')}
-                    className="bg-black border border-slate-700 text-amber-500 font-bold px-4 py-2 font-mono uppercase focus:outline-none focus:border-amber-500"
+                    className="bg-black border border-slate-700 text-amber-500 font-bold px-3 py-1.5 text-sm font-mono uppercase focus:outline-none focus:border-amber-500"
                 >
                     <option value="BTC">Bitcoin (BTC/USDT)</option>
                     <option value="ETH">Ethereum (ETH/USDT)</option>
