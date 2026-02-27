@@ -134,7 +134,22 @@ export default function OrderBookAnalytics({ depth, asset, layout = 'horizontal'
         };
     }, [metrics, history]);
 
-    if (!metrics || !advancedMetrics) return null;
+    if (!metrics || !advancedMetrics) {
+        return (
+            <div className={`grid gap-3 font-mono animate-pulse ${layout === 'horizontal' ? 'grid-cols-2 md:grid-cols-4 mb-8' : 'grid-cols-1 mb-0'}`}>
+                {[...Array(8)].map((_, i) => (
+                    <div key={`skel-analytic-${i}`} className="p-3 border border-slate-800 bg-black flex flex-col justify-center min-h-[90px]">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-4 h-4 rounded-full bg-slate-800/50"></div>
+                            <div className="h-2 w-24 bg-slate-800 rounded"></div>
+                        </div>
+                        <div className="h-6 w-16 bg-slate-800 rounded mb-2"></div>
+                        <div className="h-1 w-full bg-slate-800 rounded-full mt-auto"></div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     const formatCurrency = (val: number) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(val);
