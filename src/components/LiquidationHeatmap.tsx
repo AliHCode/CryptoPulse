@@ -209,7 +209,7 @@ export default function LiquidationHeatmap({ asset }: LiquidationHeatmapProps) {
                 <span className="ml-auto text-xs text-slate-500 font-mono">Last 15 Minutes</span>
             </div>
 
-            <div ref={containerRef} className="w-full h-80 relative border border-slate-800 bg-slate-900 cursor-crosshair overflow-hidden">
+            <div ref={containerRef} className="w-full h-[500px] relative border border-slate-800 bg-slate-900 cursor-crosshair overflow-hidden">
                 <canvas
                     ref={canvasRef}
                     onMouseMove={handleMouseMove}

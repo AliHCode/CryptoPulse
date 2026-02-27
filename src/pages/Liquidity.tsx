@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Activity } from 'lucide-react';
 import LiquidationHeatmap from '../components/LiquidationHeatmap';
+import OrderBookAnalytics from '../components/OrderBookAnalytics';
 
 interface DepthLevel {
     price: number;
@@ -59,7 +60,7 @@ export default function Liquidity() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div className="flex items-center gap-3">
                     <Layers className="w-6 h-6 text-amber-500" />
-                    <h1 className="text-xl font-bold tracking-widest text-slate-100 uppercase">Live Liquidity Heatmap</h1>
+                    <h1 className="text-lg font-bold tracking-widest text-slate-100 uppercase">Live Liquidity Heatmap</h1>
                 </div>
 
                 <select
@@ -80,10 +81,10 @@ export default function Liquidity() {
                         <span>Liquidity Depth</span>
                     </div>
                     <div className="bg-black border border-slate-800 divide-y divide-slate-800/50 flex flex-col-reverse">
-                        {depth.asks.slice().reverse().map((ask, i) => {
+                        {depth.asks.slice(0, 15).reverse().map((ask, i) => {
                             const heatPercent = (ask.quantity / maxVolume) * 100;
                             return (
-                                <div key={`ask-${i}`} className="relative flex justify-between px-3 py-1.5 text-sm font-mono group overflow-hidden">
+                                <div key={`ask-${i}`} className="relative flex justify-between px-3 py-1 text-sm font-mono group overflow-hidden">
                                     <div
                                         className="absolute top-0 right-0 bottom-0 bg-rose-500/20 transition-all duration-100 ease-linear"
                                         style={{ width: `${heatPercent}%` }}
@@ -103,10 +104,10 @@ export default function Liquidity() {
                         <span>Liquidity Depth</span>
                     </div>
                     <div className="bg-black border border-slate-800 divide-y divide-slate-800/50">
-                        {depth.bids.map((bid, i) => {
+                        {depth.bids.slice(0, 15).map((bid, i) => {
                             const heatPercent = (bid.quantity / maxVolume) * 100;
                             return (
-                                <div key={`bid-${i}`} className="relative flex justify-between px-3 py-1.5 text-sm font-mono group overflow-hidden">
+                                <div key={`bid-${i}`} className="relative flex justify-between px-3 py-1 text-sm font-mono group overflow-hidden">
                                     <div
                                         className="absolute top-0 left-0 bottom-0 bg-emerald-500/20 transition-all duration-100 ease-linear"
                                         style={{ width: `${heatPercent}%` }}
@@ -128,6 +129,7 @@ export default function Liquidity() {
             )}
 
             <div className="mt-8 pt-8 border-t border-slate-800">
+                <OrderBookAnalytics depth={depth} asset={asset} />
                 <LiquidationHeatmap asset={asset} />
             </div>
         </div>
