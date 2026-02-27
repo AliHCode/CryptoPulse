@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCryptoStore } from '../store/cryptoStore';
 import { fetchCoinHistory } from '../services/api';
-import { BarChart3, TrendingUp, TrendingDown, Clock, PieChart, Activity, BellPlus, X, AlertTriangle, ArrowRight, LineChart as LineChartIcon, CandlestickChart } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Clock, PieChart, Activity, BellPlus, X, AlertTriangle, ArrowRight, LineChart as LineChartIcon, CandlestickChart, BrainCircuit } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { ArrowLeft, Bell } from 'lucide-react';
@@ -10,6 +10,7 @@ import { clsx } from 'clsx';
 import OrderBook from '../components/OrderBook';
 import PriceFlash from '../components/PriceFlash';
 import TradingViewChart from '../components/TradingViewChart';
+import QuantSidebar from '../components/QuantSidebar';
 
 export default function CoinDetail() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function CoinDetail() {
   const [timeframe, setTimeframe] = useState(7);
   const [history, setHistory] = useState<any[]>([]);
   const [chartType, setChartType] = useState<'line' | 'candle'>('line');
+  const [isQuantView, setIsQuantView] = useState(false);
 
   // Modal States
   const [showPositionModal, setShowPositionModal] = useState(false);
@@ -161,9 +163,9 @@ export default function CoinDetail() {
       </div>
 
       {/* Main Analysis Section */}
-      <div className="grid lg:grid-cols-4 gap-6">
+      <div className={clsx("grid gap-6", isQuantView ? "lg:grid-cols-4" : "lg:grid-cols-4")}>
         {/* Chart Section */}
-        <div className="lg:col-span-3 border border-slate-800 bg-black p-6 flex flex-col min-h-[500px]">
+        <div className={clsx("border border-slate-800 bg-black p-6 flex flex-col min-h-[500px]", isQuantView ? "lg:col-span-3" : "lg:col-span-4")}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-sm font-bold text-amber-500 uppercase flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -196,6 +198,19 @@ export default function CoinDetail() {
                   <span className="hidden sm:inline">Candles</span>
                 </button>
               </div>
+
+              {/* Quant View Toggle */}
+              <button
+                onClick={() => setIsQuantView(!isQuantView)}
+                className={clsx(
+                  "flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition-all border border-slate-800 rounded uppercase",
+                  isQuantView ? "bg-amber-500/20 text-amber-500 border-amber-500/50" : "bg-black text-slate-500 hover:text-white hover:bg-slate-900"
+                )}
+                title="Institutional Order Book Metrics"
+              >
+                <BrainCircuit className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Quant View</span>
+              </button>
 
               {/* Timeframe Selector */}
               <div className="flex border border-slate-800 rounded overflow-hidden">
@@ -265,8 +280,15 @@ export default function CoinDetail() {
           </div>
         </div>
 
+        {/* Quant Sidebar Section */}
+        {isQuantView && (
+          <div className="lg:col-span-1 h-[600px] lg:h-auto">
+            <QuantSidebar symbol={coin.symbol} />
+          </div>
+        )}
+
         {/* Order Book Section */}
-        <div className="lg:col-span-1 h-[500px]">
+        <div className={clsx(isQuantView ? "lg:col-span-1" : "lg:col-span-1", "h-[500px]")}>
           <OrderBook symbol={coin.symbol} coinId={coin.id} />
         </div>
       </div>
