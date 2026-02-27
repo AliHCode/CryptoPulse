@@ -97,6 +97,19 @@ export default function WhaleAlerts() {
         }).format(val);
     };
 
+    const getBlockExplorerUrl = (blockchain: string, hash: string) => {
+        if (!hash) return '#';
+        const net = blockchain?.toLowerCase() || '';
+        if (net.includes('bitcoin') || net.includes('btc')) return `https://mempool.space/tx/${hash}`;
+        if (net.includes('ethereum') || net.includes('erc20') || net.includes('eth')) return `https://etherscan.io/tx/${hash}`;
+        if (net.includes('solana') || net.includes('sol')) return `https://solscan.io/tx/${hash}`;
+        if (net.includes('tron') || net.includes('trx')) return `https://tronscan.org/#/transaction/${hash}`;
+        if (net.includes('ripple') || net.includes('xrp')) return `https://xrpscan.com/tx/${hash}`;
+        if (net.includes('dogecoin') || net.includes('doge')) return `https://dogechain.info/tx/${hash}`;
+        // Generic fallback
+        return `https://blockchair.com/search?q=${hash}`;
+    };
+
     return (
         <div className="space-y-6 font-mono pb-20">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-4">
@@ -179,9 +192,10 @@ export default function WhaleAlerts() {
 
                                         <td className="p-4 text-right">
                                             <a
-                                                href={`#${tx.hash || ''}`}
+                                                href={getBlockExplorerUrl(tx.blockchain, tx.hash)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-700 text-[10px] text-slate-400 font-bold font-mono hover:text-indigo-400 hover:border-indigo-500 transition-colors uppercase"
-                                                onClick={(e) => e.preventDefault()}
                                             >
                                                 {(tx.hash || 'UNKNOWN').substring(0, 8)}...
                                                 <ExternalLink className="w-3 h-3" />
