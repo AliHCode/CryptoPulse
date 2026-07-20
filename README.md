@@ -31,7 +31,7 @@ Whether you're tracking whale movements, analyzing charts via TradingView, or mo
 -  **👛 Web3 Portfolio Tracking**: Connect your Ethereum/Web3 wallet via ethers.js to monitor balances and PkL in real-time.
 -  **🧠 AI Market Analysis**: Integrated Google Gemini AI to analyze market trends and provide instant sentiment reports.
 -  **📲 Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen with offline asset caching.
--  **🔔 Smart Background Alerts**: Dedicated Web Workers evaluate price alerts off-thread and trigger native OS push notifications.
+-  **🔔 Smart Background Alerts**: Dedicated Web Workers evaluate price alerts off-thread and trigger native OS push notifications
 
 ---
 
