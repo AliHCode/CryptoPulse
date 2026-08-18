@@ -29,7 +29,7 @@ Whether you're tracking whale movements, analyzing charts via TradingView, or mo
 -  **📡 Smart Money Radar**: Real-time tracking of large-cap whale transactions (> $5M) across multiple blockchains.
 -  **📈 TradingView Integration**: Interactive, professional-grade candlestick charts for technical analysis on every asset.
 -  **👛 Web3 Portfolio Tracking**: Connect your Ethereum/Web3 wallet via ethers.js to monitor balances and PkL in real-time.
--  **🧠 AI Market Analysis**: Integrated Google Gemini AI to analyze market trends and provide instant sentiment reports.
+-  **🧠 AI Market Analysis**: Integrated Google Gemini AI to analyze market trends and provide instant sentiment report.
 -  **📲 Progressive Web App (PWA)**: Fully installable to your mobile device or desktop homescreen with offline asset caching.
 -  **🔔 Smart Background Alerts**: Dedicated Web Workers evaluate price alerts off-thread and trigger native OS push notifications
 
