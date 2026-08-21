@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ CryptoPulse TERMINAL
+# ⚡ CryptoPulse Terminal
 Your high-performance, real-time cryptocurrency trading terminal & portfolio tracker.<br>
 Built with ❤️ using React 19, Tailwind v4 & Vite 6
 
