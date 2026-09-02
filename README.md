@@ -2,7 +2,7 @@
 
 # ⚡ CryptoPulse Terminal
 Your high-performance, real-time cryptocurrency trading terminal, whale tracker & portfolio tracker.<br>
-Built with ❤️ using React 19, Tailwind v4 & Vite 6
+Built with ❤️ using React 19 , Tailwind v4 & Vite 6
 
 [![React](https://img.shields.io/badge/React-19.x-61dafb?style=flat-square&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
